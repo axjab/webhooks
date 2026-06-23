@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
 
-import sys, json
-from pykit import Configurator, Webhook, load_webhook
+import json
+from pykit import Logger, Configurator, Webhook
 
-
-# TODO: NEED A LOGGER
 
 conf = Configurator(
     db_path = "/data/webhooks.db"
 )
 
-w : Webhook = load_webhook()
+w = Webhook.from_env()
 print(w)
-
-print("notify: SMS RECEIVED")  # TODO: TEST THIS: Will be notified
-print("\nThis is debug output, will be ignored.")
+print(f"notify: {w}")
 
 # 1. VALIDATE FIRST (hard gate)
 # if not validate(w):
@@ -23,11 +19,11 @@ print("\nThis is debug output, will be ignored.")
 #     return
 
 # 2. NORMALIZE (safe because validated)
-msg = {
-    "from": w.body["from"],
-    "to": w.body["to"],
-    "message": w.body["message"],
-}
+# msg = {
+#     "from": w.payload["from"],
+#     "to": w.payload["to"],
+#     "message": w.payload["message"],
+# }
 
 # 3. CLASSIFY
 # label = classify(msg)
