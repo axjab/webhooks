@@ -44,7 +44,7 @@
 # < Date: Tue, 23 Jun 2026 11:48:25 GMT
 # < Transfer-Encoding: chunked
 
-exec > /tmp/webhookd.log 2>&1
+# exec > /tmp/webhookd.log 2>&1
 
 # meta
 echo "=== ${hook_method} /${hook_name}/${hook_id} ==="
@@ -75,4 +75,4 @@ user_agent="$user_agent" \
 x_webauth_user="${x_webauth_user:-anon}" \
 content_type="${content_type:-text/plain}" \
 data="${1:-}" \
-/scripts/sms.py
+"$WHD_HOOK_SCRIPTS"/sms.py

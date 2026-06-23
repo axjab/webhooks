@@ -11,6 +11,7 @@ conf = Configurator(
 w = Webhook.from_env()
 print(w)
 print(f"notify: {w}")
+print("notified?")
 
 # 1. VALIDATE FIRST (hard gate)
 # if not validate(w):
