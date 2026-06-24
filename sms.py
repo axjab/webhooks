@@ -36,23 +36,21 @@ sms = w.payload
 #         'power': 'unplugged'  # or "ac"
 #     })
 
-# Clean up and send to ntfy
-n = Notification(
-    sequence_id=f"sms:{sms['from']}:{sms['sentStamp']}", # idempotency against retries
-    topic="sms",
-    message=sms["text"],
-    title=f"Message from {sms['from']}",  # in the future, this should be matched to contacts from Radicale server
-    markdown=False,
-    icon="",  # chat bubble or something
-    tags=[f"sent:relative_seconds", f"battery:{sms['battery']}", f"power:{sms['power']}"]
-    # default priority
-    # no attachments
-    # no click
-    # no actions, need ideas
-    # call? idk
-)
-
 try:
+    n = Notification(
+        sequence_id=f"sms:{sms['from']}:{sms['sentStamp']}", # idempotency against retries
+        topic="sms",
+        message=sms["text"],
+        title=f"Message from {sms['from']}",  # in the future, this should be matched to contacts from Radicale server
+        markdown=False,
+        icon="",  # chat bubble or something
+        tags=[f"sent:relative_seconds", f"battery:{sms['battery']}", f"power:{sms['power']}"]
+        # default priority
+        # no attachments
+        # no click
+        # no actions, need ideas
+        # call? idk
+    )
     ntfy.post(n)
 except KeyError as e:
     print(f"SMS webhook missing field: {e}")

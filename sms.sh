@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# exec > /tmp/webhookd.log 2>&1
+exec >> /tmp/webhookd.log 2>&1
 
 hook_method="$hook_method" \
 hook_name="$hook_name" \
