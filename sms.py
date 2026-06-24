@@ -15,19 +15,8 @@ try:
         token=conf.ntfy_token
     )
 
-    w = Webhook.from_env()  # not yet validated
-    # sample:
-    # Webhook(
-    #     id='8',
-    #     name='sms',
-    #     method='POST',
-    #     originator='SMS Forwarder App',
-    #     x_forwarded_for='209.87.229.73',
-    #     x_webauth_user='anon',
-    #     content_type='application/json; charset=utf-8',
-    #     payload=(sms)
-
-    sms = w.payload
+    webhook = Webhook.from_env()
+    sms = webhook.payload
     #     sms={
     #         'from': '+12345678900',
     #         'text': 'This is a measage with\\nnew lines and\\nemojiiis 👨\\u200d🌾👩\\u200d🌾👨\\u200d⚖️',
@@ -40,10 +29,10 @@ try:
     n = Notification(
         sequence_id=f"{sms['from'].lstrip('+')}-{sms['sentStamp']}",  # idempotency against retries
         topic="sms",
-        message=sms["text"],
-        title=f"Message from {sms['from']}",  # in the future, this should be matched to contacts from Radicale server
-        markdown=False,
-        icon="",  # chat bubble or something
+        message=f"### Message from `{sms['from']}`\n> {sms['text']}",
+        # no title
+        markdown=True,
+        icon="",  # URL to chat bubble or something
         tags=[f"sent:relative_seconds", f"battery:{sms['battery']}", f"power:{sms['power']}"]
         # default priority
         # no attachments
