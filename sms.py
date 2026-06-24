@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-import json
+import sys, requests
 from pykit import Logger, Configurator, Webhook, Notifier, Notification, env
-
-log = Logger()
 
 conf = Configurator(
     db_path = "/data/webhooks.db",
@@ -56,10 +54,23 @@ n = Notification(
 
 try:
     ntfy.post(n)
-except Exception as e:
-    log.exception("failed to process SMS webhook")
-    log(str(e))
-    raise  # lets the webhook framework return 5xx, which the forwarder will retry
+except KeyError as e:
+    print(f"SMS webhook missing field: {e}")
+    sys.exit(100)
+except requests.exceptions.RequestException:
+    print("ntfy delivery failed")
+    sys.exit(202)
+except Exception:
+    print("unhandled error")
+    sys.exit(200)
+
+## example of checking missing fields
+# required = {"from", "text", "sentStamp", "receivedStamp", "battery", "power"}
+# missing = required - sms.keys()
+# if missing:
+#     log.error(f"SMS webhook missing fields: {missing}")
+#     return  # or whatever your framework expects for a 4xx response
+
 
 
 ## Later ==================
