@@ -3,40 +3,40 @@
 import sys, requests
 from pykit import Logger, Configurator, Webhook, Notifier, Notification, env
 
-conf = Configurator(
-    db_path = "/data/webhooks.db",
-    ntfy_url = env("NTFY_URL"),
-    ntfy_token = env("NTFY_TOKEN")
-)
-
-ntfy = Notifier(
-    url=conf.ntfy_url,
-    token=conf.ntfy_token
-)
-
-w = Webhook.from_env()  # not yet validated
-# sample:
-# Webhook(
-#     id='8',
-#     name='sms',
-#     method='POST',
-#     originator='SMS Forwarder App',
-#     x_forwarded_for='209.87.229.73',
-#     x_webauth_user='anon',
-#     content_type='application/json; charset=utf-8',
-#     payload=(sms)
-
-sms = w.payload
-#     sms={
-#         'from': '+12345678900',
-#         'text': 'This is a measage with\\nnew lines and\\nemojiiis 👨\\u200d🌾👩\\u200d🌾👨\\u200d⚖️',
-#         'sentStamp': 1782239238000,
-#         'receivedStamp': 1782239239557,
-#         'battery': '33',
-#         'power': 'unplugged'  # or "ac"
-#     })
-
 try:
+    conf = Configurator(
+        db_path = "/data/webhooks.db",
+        ntfy_url = env("NTFY_URL",required=True),
+        ntfy_token = env("NTFY_TOKEN",required=True)
+    )
+
+    ntfy = Notifier(
+        url=conf.ntfy_url,
+        token=conf.ntfy_token
+    )
+
+    w = Webhook.from_env()  # not yet validated
+    # sample:
+    # Webhook(
+    #     id='8',
+    #     name='sms',
+    #     method='POST',
+    #     originator='SMS Forwarder App',
+    #     x_forwarded_for='209.87.229.73',
+    #     x_webauth_user='anon',
+    #     content_type='application/json; charset=utf-8',
+    #     payload=(sms)
+
+    sms = w.payload
+    #     sms={
+    #         'from': '+12345678900',
+    #         'text': 'This is a measage with\\nnew lines and\\nemojiiis 👨\\u200d🌾👩\\u200d🌾👨\\u200d⚖️',
+    #         'sentStamp': 1782239238000,
+    #         'receivedStamp': 1782239239557,
+    #         'battery': '33',
+    #         'power': 'unplugged'  # or "ac"
+    #     })
+
     n = Notification(
         sequence_id=f"sms:{sms['from']}:{sms['sentStamp']}", # idempotency against retries
         topic="sms",
@@ -52,6 +52,10 @@ try:
         # call? idk
     )
     ntfy.post(n)
+
+except ValueError as e:
+    print(e)
+    sys.exit(200)
 except KeyError as e:
     print(f"SMS webhook missing field: {e}")
     sys.exit(100)
