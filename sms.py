@@ -38,7 +38,7 @@ try:
     #     })
 
     n = Notification(
-        sequence_id=f"sms:{sms['from']}:{sms['sentStamp']}", # idempotency against retries
+        sequence_id=f"{sms['from'].lstrip('+')}-{sms['sentStamp']}",  # idempotency against retries
         topic="sms",
         message=sms["text"],
         title=f"Message from {sms['from']}",  # in the future, this should be matched to contacts from Radicale server
