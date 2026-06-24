@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 
 import json
-from pykit import Logger, Configurator, Webhook
+from pykit import Logger, Configurator, Webhook, Notifier, Notification, env
 
 
 conf = Configurator(
-    db_path = "/data/webhooks.db"
+    db_path = "/data/webhooks.db",
+    ntfy_url = env("NTFY_URL"),
+    ntfy_token = env("NTFY_TOKEN")
+)
+
+ntfy = Notifier(
+    url=conf.ntfy_url,
+    token=conf.ntfy_token
 )
 
 w = Webhook.from_env()  # not yet validated
@@ -18,7 +25,10 @@ w = Webhook.from_env()  # not yet validated
 #     x_forwarded_for='209.87.229.73',
 #     x_webauth_user='anon',
 #     content_type='application/json; charset=utf-8',
-#     payload={
+#     payload=(sms)
+
+sms = w.payload
+#     sms={
 #         'from': '+12345678900',
 #         'text': 'This is a measage with\\nnew lines and\\nemojiiis 👨\\u200d🌾👩\\u200d🌾👨\\u200d⚖️',
 #         'sentStamp': 1782239238000,
@@ -27,14 +37,23 @@ w = Webhook.from_env()  # not yet validated
 #         'power': 'unplugged'  # or "ac"
 #     })
 
-
-
 # Clean up and send to ntfy
+n = Notification(
+    sequence_id=f"sms:{sms['from']}:{sms['sentStamp']}", # idempotency against retries
+    topic="sms",
+    message=sms["text"],
+    title=f"Message from {sms['from']}",  # in the future, this should be matched to contacts from Radicale server
+    markdown=False,
+    icon="",  # chat bubble or something
+    tags=[f"sent:relative_seconds", f"battery:{sms['battery']}", f"power:{sms['power']}"]
+    # default priority
+    # no attachments
+    # no click
+    # no actions, need ideas
+    # call? idk
+)
 
-
-
-
-
+ntfy.notify(n)
 
 
 ## Later ==================
