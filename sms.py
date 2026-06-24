@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, requests
-from pykit import Logger, Configurator, Webhook, Notifier, Notification, env
+from pykit import Configurator, Webhook, Notifier, Notification, env
 
 try:
     conf = Configurator(
@@ -57,13 +57,13 @@ except ValueError as e:
     print(e)
     sys.exit(200)
 except KeyError as e:
-    print(f"SMS webhook missing field: {e}")
+    print(f"notify: SMS webhook missing field: {e}")
     sys.exit(100)
 except requests.exceptions.RequestException:
-    print("ntfy delivery failed")
+    print("notify: ntfy delivery failed")
     sys.exit(202)
-except Exception:
-    print("unhandled error")
+except Exception as e:
+    print(f"notify: {e}")
     sys.exit(200)
 
 ## example of checking missing fields
