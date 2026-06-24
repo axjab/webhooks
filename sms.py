@@ -3,6 +3,7 @@
 import json
 from pykit import Logger, Configurator, Webhook, Notifier, Notification, env
 
+log = Logger()
 
 conf = Configurator(
     db_path = "/data/webhooks.db",
@@ -53,7 +54,12 @@ n = Notification(
     # call? idk
 )
 
-ntfy.notify(n)
+try:
+    ntfy.post(n)
+except Exception as e:
+    log.exception("failed to process SMS webhook")
+    log(str(e))
+    raise  # lets the webhook framework return 5xx, which the forwarder will retry
 
 
 ## Later ==================
