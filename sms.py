@@ -1,7 +1,34 @@
 #!/usr/bin/env python3
 
-import sys, requests
+import sys, requests, time
 from pykit import Configurator, Webhook, Notifier, Notification, env
+
+
+def normalize_sms(webhook:Webhook):
+    if "application/json" in webhook.content_type:
+        return webhook.payload
+
+    if "application/x-www-form-urlencoded" in webhook.content_type:
+        payload = webhook.payload
+        _from = payload["from"].strip()
+        _to   = payload["to"].strip()
+        if not _from.startswith("+"):
+            _from = f"+{_from}"
+        if not _to.startswith("+"):
+            _to = f"+{_to}"
+        now = int(time.time() * 1000)
+        return {
+            "from": _from,
+            "to": _to,
+            "text": payload["body"],
+            "sentStamp": now,
+            "receivedStamp": now,
+            "battery": payload.get("battery"),
+            "power": payload.get("power"),
+        }
+
+    raise ValueError(f"unsupported content_type: {webhook.content_type}")
+# end of normalize_sms
 
 try:
     conf = Configurator(
@@ -16,7 +43,7 @@ try:
     )
 
     webhook = Webhook.from_env()
-    sms = webhook.payload
+    sms = normalize_sms(webhook)
     #     sms={
     #         'from': '+12345678900',
     #         'text': 'This is a measage with\\nnew lines and\\nemojiiis 👨\\u200d🌾👩\\u200d🌾👨\\u200d⚖️',
@@ -26,20 +53,34 @@ try:
     #         'power': 'unplugged'  # or "ac"
     #     })
 
+    # n = Notification(
+    #     sequence_id=f"{sms['from'].lstrip('+')}-{sms['sentStamp']}",  # idempotency against retries
+    #     topic="comms",
+    #     message=f"From `{sms['from']}` to `{sms['to']}`\n> {sms['text']}",
+    #     # no title
+    #     markdown=True,
+    #     icon="",  # URL to chat bubble or something
+    #     tags=[f"sent:relative_seconds", f"battery:{sms['battery']}", f"power:{sms['power']}"]
+    #     # default priority
+    #     # no attachments
+    #     # no click
+    #     # no actions, need ideas
+    #     # call? idk
+    # )
+
     n = Notification(
-        sequence_id=f"{sms['from'].lstrip('+')}-{sms['sentStamp']}",  # idempotency against retries
-        topic="sms",
-        message=f"### Message from `{sms['from']}`\n> {sms['text']}",
-        # no title
-        markdown=True,
-        icon="",  # URL to chat bubble or something
-        tags=[f"sent:relative_seconds", f"battery:{sms['battery']}", f"power:{sms['power']}"]
-        # default priority
-        # no attachments
-        # no click
-        # no actions, need ideas
-        # call? idk
-    )
+          sequence_id=f"{sms['from'].lstrip('+')}-{sms['sentStamp']}",
+          topic="comms",
+          message=f"From `{sms['from']}` to `{sms.get('to', 'unknown')}`\n> {sms['text']}",
+          markdown=True,
+          icon="",
+          tags=[t for t in [
+              "sent:relative_seconds",
+              f"battery:{sms['battery']}" if sms.get("battery") is not None else None,
+              f"power:{sms['power']}"     if sms.get("power")   is not None else None,
+          ] if t is not None]
+      )
+    
     ntfy.post(n)
 
 except ValueError as e:
