@@ -78,7 +78,8 @@ try:
               "sent:relative_seconds",
               f"battery:{sms['battery']}" if sms.get("battery") is not None else None,
               f"power:{sms['power']}"     if sms.get("power")   is not None else None,
-          ] if t is not None]
+          ] if t is not None],
+          call= "yes" if sms["text"].strip().lower().startswith("/call") else ""
       )
     
     ntfy.post(n)

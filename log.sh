@@ -1,6 +1,6 @@
 #!/bin/bash
 
-exec >> /tmp/webhookd.log 2>&1
+exec >> /tmp/webhookd.log.log 2>&1
 
 main() {
 	hook_method="$hook_method" \
@@ -34,20 +34,27 @@ route_by_source() {
 
 build_twilio_payload() {
     echo "{
-  \"message_sid\": \"$message_sid\",
-  \"sms_message_sid\": \"$sms_message_sid\",
+  \"to_country\": \"$to_country\",
   \"error_url\": \"$error_url\",
+  \"to_state\": \"$to_state\",
+  \"sms_message_sid\": \"$sms_message_sid\",
   \"error_code\": \"$error_code\",
   \"num_media\": \"$num_media\",
-  \"sms_sid\": \"$sms_sid\",
-  \"sms_status\": \"$sms_status\",
-  \"from_country\": \"$from_country\",
-  \"from_state\": \"$from_state\",
-  \"from_city\": \"$from_city\",
+  \"to_city\": \"$to_city\",
   \"from_zip\": \"$from_zip\",
-  \"from\": \"$from\",
-  \"to\": \"$to\",
+  \"sms_sid\": \"$sms_sid\",
+  \"from_state\": \"$from_state\",
+  \"sms_status\": \"$sms_status\",
+  \"from_city\": \"$from_city\",
   \"body\": \"$body\",
+  \"from_country\": \"$from_country\",
+  \"to\": \"$to\",
+  \"to_zip\": \"$to_zip\",
+  \"num_segments\": \"$num_segments\",
+  \"message_sid\": \"$message_sid\",
+  \"account_sid\": \"$account_sid\",
+  \"from\": \"$from\",
+  \"api_version\": \"$api_version\"
 }"
 }
 
