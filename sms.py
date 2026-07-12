@@ -70,7 +70,7 @@ try:
 
     n = Notification(
           sequence_id=f"{sms['from'].lstrip('+')}-{sms['sentStamp']}",
-          topic="comms",
+          topic="messages",
           message=f"From `{sms['from']}` to `{sms.get('to', 'unknown')}`\n> {sms['text']}",
           markdown=True,
           icon="",
